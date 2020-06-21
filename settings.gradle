@@ -1,0 +1,3 @@
+include ':lib_sketchpad'
+include ':app'
+rootProject.name = "Jpainter"
