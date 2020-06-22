@@ -102,39 +102,15 @@ public class CanvasPath {
         return width;
     }
 
-    public void onDrawDoodle(Canvas canvas, Paint paint, float scale) {
-        if (mode == IOptionMode.DOODLE) {
-            paint.setColor(color);
-            paint.setStrokeWidth(width/scale);
-            // rewind
-            canvas.drawPath(path, paint);
-        }
-    }
-
-    public void onDrawMosaic(Canvas canvas, Paint paint) {
-        if (mode == IOptionMode.RUBBER) {
-            paint.setStrokeWidth(width);
-            canvas.drawPath(path, paint);
-        }
-    }
-
     public void transform(Matrix matrix) {
         path.transform(matrix);
-    }
-
-    /**
-     * 旋转
-     * @param centerX
-     * @param centerY
-     * @param rotateAngle
-     */
-    public void rotate(float centerX,float centerY,float rotateAngle){
     }
 
     public List<PathPoint> getPathPointList() {
         return pathPointList;
     }
 
+    @Deprecated
     public void scale(float centerX,float centerY,float scale){
         if(!pathPointList.isEmpty()){
             for (PathPoint pathPoint:pathPointList){

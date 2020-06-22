@@ -16,8 +16,9 @@ import android.view.ViewConfiguration;
 import android.widget.FrameLayout;
 
 import com.example.sketchpad.option.BaseOpt;
-import com.example.sketchpad.utils.CommonUtils;
 import com.example.sketchpad.option.IOptionMode;
+import com.example.sketchpad.utils.CanvasManager;
+import com.example.sketchpad.utils.CommonUtils;
 import com.example.sketchpad.utils.IMGHelp;
 
 import java.util.ArrayList;
@@ -32,11 +33,11 @@ import java.util.List;
  **/
 public class CanvasView extends FrameLayout {
 
-    private static final String TAG = "SketchpadView";
+    private final String TAG = getClass().getSimpleName();
 
-    private IMGHelp mImage;
+    private CanvasManager mCanvasManager;
 
-    private Pen mPen = new Pen();
+    private PaintBrush mPaintBrush = new PaintBrush();
 
     private int mPointerCount = 0;
 
@@ -44,12 +45,10 @@ public class CanvasView extends FrameLayout {
 
     private Paint mRubberPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private static final boolean DEBUG = true;
-
     {
         // 涂鸦画刷
         mDoodlePaint.setStyle(Paint.Style.STROKE);
-        mDoodlePaint.setStrokeWidth(mPen.getWidth());
+        mDoodlePaint.setStrokeWidth(mPaintBrush.getWidth());
         mDoodlePaint.setColor(Color.RED);
         mDoodlePaint.setPathEffect(new CornerPathEffect(CanvasPath.BASE_DOODLE_WIDTH));
         mDoodlePaint.setStrokeCap(Paint.Cap.ROUND);
@@ -80,46 +79,45 @@ public class CanvasView extends FrameLayout {
     }
 
     public void initialize(Context context) {
-        mImage = new IMGHelp();
-        mPen.setMode(mImage.getMode());
+        mCanvasManager = new CanvasManager();
+        mPaintBrush.setMode(mCanvasManager.getMode());
+        mCanvasManager.setDoodlePaint(mDoodlePaint);
     }
 
     public void setImageBitmap(Bitmap image) {
-        mImage.setBitmap(image);
+        mCanvasManager.setBitmap(image);
         invalidate();
     }
 
     public void setMode(@IOptionMode.Mode int mode) {
-        mPen.reset();
+        mPaintBrush.reset();
         // 设置新的编辑模式
-        mImage.setMode(mode);
-        mPen.setMode(mode);
+        mCanvasManager.setMode(mode);
+        mPaintBrush.setMode(mode);
         invalidate();
     }
-
 
     /**
      * 获取所有的操作
      * @return
      */
     public List<BaseOpt> getAllOptList(){
-        return mImage.getOptItemList();
+        return mCanvasManager.getOptItemList();
     }
-
 
     /**
      * 获取所有的操作
      * @return
      */
     public List<BaseOpt> getAllBackOptList(){
-        return mImage.getAllBackOptList();
+        return mCanvasManager.getAllBackOptList();
     }
 
     /**
      * 清空所有回退操作
      */
     public void clearAllBackOPt(){
-        mImage.clearAllBackOPt();
+        mCanvasManager.clearAllBackOPt();
 
     }
 
@@ -129,20 +127,20 @@ public class CanvasView extends FrameLayout {
      * 保存所有回退操作
      */
     public void saveAllBackOpt(){
-        mImage.saveAllBackOPt();
+        mCanvasManager.saveAllBackOPt();
         invalidate();
     }
 
-    public void setPenColor(int color) {
-        mPen.setColor(color);
+    public void setPaintBrushPenColor(int color) {
+        mPaintBrush.setColor(color);
     }
 
-    public int getPenColor() {
-        return mPen.getColor();
+    public int getPaintBrushColor() {
+        return mPaintBrush.getColor();
     }
 
     public @IOptionMode.Mode int getMode() {
-        return mImage.getMode();
+        return mCanvasManager.getMode();
     }
 
     @Override
@@ -152,76 +150,30 @@ public class CanvasView extends FrameLayout {
 
     private void onDrawImages(Canvas canvas, boolean isSaveBitmap,boolean isShowClear) {
         canvas.save();
-
-        /**
-         * clip 中心旋转
-         */
-        RectF clipFrame = mImage.getClipFrame();
-        canvas.rotate(mImage.getRotate(), clipFrame.centerX(), clipFrame.centerY());
-
-        /**
-         * 背景图片
-         */
+        //背景图片
         if(isSaveBitmap){
-            mImage.onDrawImage(canvas);
+            mCanvasManager.onDrawImage(canvas);
         }
-
-        /**
-         * 按层级顺序显示item
-         */
-         mImage.onDrawItemList(canvas,isShowClear);
-
-        /**
-         * 绘制的时候实时显示涂鸦路径
-         */
-        if (mImage.getMode() == IOptionMode.DOODLE && !mPen.isEmpty()) {
-            mDoodlePaint.setColor(mPen.getColor());
-            mDoodlePaint.setStrokeWidth(mPen.getWidth());
+        //按层级顺序绘制item
+        mCanvasManager.onDrawItemList(canvas,isShowClear);
+        //绘制的时候实时显示涂鸦路径
+        if (mCanvasManager.getMode() == IOptionMode.DOODLE && !mPaintBrush.isEmpty()) {
+            mDoodlePaint.setColor(mPaintBrush.getColor());
+            mDoodlePaint.setStrokeWidth(mPaintBrush.getWidth());
             canvas.save();
-            RectF frame = mImage.getClipFrame();
-            canvas.rotate(-mImage.getRotate(), frame.centerX(), frame.centerY());
             canvas.translate(getScrollX(), getScrollY());
-            canvas.drawPath(mPen.getPath(), mDoodlePaint);
+            canvas.drawPath(mPaintBrush.getPath(), mDoodlePaint);
             canvas.restore();
         }
 
         canvas.restore();
     }
 
-    public Bitmap saveBitmap(boolean isSaveBg,boolean isShowClear) {
-
-        float scale = 1f / mImage.getScale();
-
-        RectF frame = new RectF(mImage.getClipFrame());
-
-        // 旋转基画布
-        Matrix m = new Matrix();
-        m.setRotate(mImage.getRotate(), frame.centerX(), frame.centerY());
-        m.mapRect(frame);
-
-        // 缩放基画布
-        m.setScale(scale, scale, frame.left, frame.top);
-        m.mapRect(frame);
-
-        Bitmap bitmap = Bitmap.createBitmap(Math.round(frame.width()),
-                Math.round(frame.height()), Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-
-        // 平移到基画布原点&缩放到原尺寸
-        canvas.translate(-frame.left, -frame.top);
-        canvas.scale(scale, scale, frame.left, frame.top);
-
-        onDrawImages(canvas,isSaveBg,isShowClear);
-
-        return bitmap;
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
-            mImage.onWindowChanged(right - left, bottom - top);
+            mCanvasManager.onWindowChanged(right - left, bottom - top);
         }
     }
 
@@ -234,7 +186,7 @@ public class CanvasView extends FrameLayout {
     }
 
     boolean onInterceptTouch(MotionEvent event) {
-        if (mImage.getMode() == IOptionMode.ROTATE) {
+        if (mCanvasManager.getMode() == IOptionMode.ROTATE) {
             return true;
         }
         return false;
@@ -248,12 +200,10 @@ public class CanvasView extends FrameLayout {
     float preX = 0;
     float preY = 0;
 
-    boolean onTouch(MotionEvent event) {
+    private boolean onTouch(MotionEvent event) {
         boolean handled = true;
         mPointerCount = event.getPointerCount();
-
-
-        int mode = mImage.getMode();
+        int mode = mCanvasManager.getMode();
 
         if (mode != IOptionMode.NONE && mode != IOptionMode.TEXT && mPointerCount > 1) {
             boolean isPath = event.getEventTime() - event.getDownTime() > ViewConfiguration.getDoubleTapTimeout();
@@ -267,7 +217,7 @@ public class CanvasView extends FrameLayout {
                 float creX = event.getX();
                 float creY = event.getY();
                 if(mode == IOptionMode.RUBBER){
-                    List<CanvasPath> CanvasPaths =  mImage.getmDoodles();
+                    List<CanvasPath> CanvasPaths =  mCanvasManager.getDoodles();
                     if(CanvasPaths!=null && CanvasPaths.size()>0 && preX!=0 && preY!=0){
                         float scrollX = getScrollX();
                         float scrollY = getScrollY();
@@ -294,14 +244,11 @@ public class CanvasView extends FrameLayout {
 
                                     float[] point = {x3, y3, x4, y4};
                                     Matrix matrix = new Matrix();
-                                    RectF frame = mImage.getClipFrame();
-                                    matrix.preRotate(-mImage.getRotate(), frame.centerX(), frame.centerY());
                                     matrix.mapPoints(point);
-
                                     boolean isClear = CommonUtils.isIntersect(x1, y1, x2, y2,
                                             point[0], point[1], point[2], point[3]);
                                     if(isClear){
-                                        mImage.undoDoodleByItem(CanvasPath);
+                                        mCanvasManager.undoDoodleByItem(CanvasPath);
                                     }
                                 }
                             }
@@ -318,11 +265,9 @@ public class CanvasView extends FrameLayout {
                 preY = 0;
                 break;
         }
-
         recordPoint(event);
-
         return handled;
-    }/**/
+    }
 
     private boolean pointInPath(Path path, int x,int y) {
         RectF bounds = new RectF();
@@ -337,7 +282,7 @@ public class CanvasView extends FrameLayout {
      * @param event
      */
     private void recordPoint(MotionEvent event){
-        @IOptionMode.Mode int mode = mImage.getMode();
+        @IOptionMode.Mode int mode = mCanvasManager.getMode();
         if(mode == IOptionMode.DOODLE){
             //涂鸦模式
             float x = event.getX();
@@ -354,7 +299,7 @@ public class CanvasView extends FrameLayout {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if(getMode()==IOptionMode.DOODLE){
-                    return mPen.isIdentity(event.getPointerId(0)) && onPathDone(event, true);
+                    return mPaintBrush.isIdentity(event.getPointerId(0)) && onPathDone(event, true);
                 }
         }
         return false;
@@ -367,11 +312,11 @@ public class CanvasView extends FrameLayout {
      * @return
      */
     private boolean onPathBegin(MotionEvent event) {
-        mPen.reset(event.getX(), event.getY());
+        mPaintBrush.reset(event.getX(), event.getY());
         //添加路径点，但是如果图像已经移动，需要把移动的位置偏移算上
-        mPen.addPointItem(event.getX()+getScrollX(), event.getY()+getScrollY());
+        mPaintBrush.addPointItem(event.getX()+getScrollX(), event.getY()+getScrollY());
 
-        mPen.setIdentity(event.getPointerId(0));
+        mPaintBrush.setIdentity(event.getPointerId(0));
         return true;
     }
 
@@ -381,10 +326,10 @@ public class CanvasView extends FrameLayout {
      * @return
      */
     private boolean onPathMove(MotionEvent event) {
-        if (mPen.isIdentity(event.getPointerId(0))) {
-            mPen.lineTo(event.getX(), event.getY());
+        if (mPaintBrush.isIdentity(event.getPointerId(0))) {
+            mPaintBrush.lineTo(event.getX(), event.getY());
             //添加路径点，但是如果图像已经移动，需要把移动的位置偏移算上
-            mPen.addPointItem(event.getX()+getScrollX(), event.getY()+getScrollY());
+            mPaintBrush.addPointItem(event.getX()+getScrollX(), event.getY()+getScrollY());
             invalidate();
             return true;
         }
@@ -396,14 +341,14 @@ public class CanvasView extends FrameLayout {
      * @return
      */
     private boolean onPathDone(MotionEvent event, boolean addOpt) {
-        if (mPen.isEmpty()) {
+        if (mPaintBrush.isEmpty()) {
             return false;
         }
         //记录画线路径点
-        mPen.addPathPoint(event.getX()+getScrollX(), event.getY()+getScrollY());
-        mImage.addPath(mPen.toPath(), getScrollX(), getScrollY(), addOpt);
+        mPaintBrush.addPathPoint(event.getX()+getScrollX(), event.getY()+getScrollY());
+        mCanvasManager.addPath(mPaintBrush.toPath(), getScrollX(), getScrollY(), addOpt);
 
-        mPen.reset();
+        mPaintBrush.reset();
         invalidate();
         return true;
     }
@@ -411,41 +356,35 @@ public class CanvasView extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mImage.release();
+        mCanvasManager.release();
     }
-
-    private static boolean isAnima = true;
 
     /**
      * 清除所有操作
      */
-    public void clearAllOpt(boolean isAnima){
-        this.isAnima = isAnima;
-        mImage.clearAllOpt();
+    public void clearAllOpt(){
+        mCanvasManager.clearAllOpt();
     }
 
-    public IMGHelp getmImage() {
-        return mImage;
+    public CanvasManager getCanvasManager() {
+        return mCanvasManager;
     }
 
     public void setBitmap(Bitmap bitmap) {
         //切换图片的时候不让旋转
-        mImage.setRotate(0);
-
-        mImage.setBitmap(bitmap);
+        mCanvasManager.setBitmap(bitmap);
         scrollTo(0, 0);
         invalidate();
     }
 
     public void reset() {
-        mImage.setRotate(0);
-        mImage.setInitialHoming(false);
-        mImage.onWindowChanged(mImage.getWindow().width(), mImage.getWindow().height());
+        mCanvasManager.setInitialHoming(false);
+        mCanvasManager.onWindowChanged(mCanvasManager.getWindow().width(), mCanvasManager.getWindow().height());
         scrollTo(0, 0);
         invalidate();
     }
 
-    public static class Pen extends CanvasPath {
+    public static class PaintBrush extends CanvasPath {
 
         private int identity = Integer.MIN_VALUE;
 

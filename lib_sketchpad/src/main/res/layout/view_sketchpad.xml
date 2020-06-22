@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <com.example.sketchpad.CanvasView
-        android:id="@+id/dooleView"
+        android:id="@+id/dooleView2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#80000000" />

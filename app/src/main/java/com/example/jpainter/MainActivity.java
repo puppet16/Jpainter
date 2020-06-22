@@ -2,10 +2,12 @@ package com.example.jpainter;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.sketchpad.SketchpadView;
+import com.example.sketchpad.utils.CommonUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mView = findViewById(R.id.iv_image);
+        mView.setBitmap(Bitmap.createBitmap(CommonUtils.getScreenWidth(this), CommonUtils.getScreenHeight(this) - CommonUtils.dip2px(this, 106), Bitmap.Config.ARGB_8888));
         mView.setOnItemClickInterface(new SketchpadView.OnItemClickInterface() {
             @Override
             public void OnCancelClick(boolean isEmpty) {

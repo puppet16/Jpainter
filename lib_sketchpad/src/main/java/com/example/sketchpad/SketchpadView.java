@@ -1,6 +1,7 @@
 package com.example.sketchpad;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,12 +9,12 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.sketchpad.option.BaseOpt;
 import com.example.sketchpad.option.IOptionMode;
+import com.example.sketchpad.utils.CanvasManager;
 import com.example.sketchpad.utils.IMGHelp;
 
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.Stack;
 /**
  * ============================================================
  * Author: ltt
- * date: 2020/6/20
+ * date: 2020/6/22
  * desc:
  * ============================================================
  **/
@@ -32,7 +33,7 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
     private CanvasView imgView;
     private TextView tvCancel;
     private Button tvClearAll, tvRubber, tvDoodle;
-    private IMGHelp mHelp;
+    private CanvasManager mHelp;
 
 
     public SketchpadView(@NonNull Context context) {
@@ -49,8 +50,8 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
     }
 
     public void initView(Context context) {
-        View rootView = LayoutInflater.from(context).inflate(R.layout.view_correct_layout, this, true);
-        imgView = rootView.findViewById(R.id.dooleView);
+        View rootView = LayoutInflater.from(context).inflate(R.layout.view_sketchpad, this, true);
+        imgView = rootView.findViewById(R.id.dooleView2);
         tvCancel = rootView.findViewById(R.id.tv_cancel);
         tvRubber = rootView.findViewById(R.id.tv_rubber);
         tvClearAll = rootView.findViewById(R.id.tv_claer_all);
@@ -59,7 +60,7 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
         tvCancel.setOnClickListener(this);
         tvRubber.setOnClickListener(this);
         tvDoodle.setOnClickListener(this);
-        mHelp = imgView.getmImage();
+        mHelp = imgView.getCanvasManager();
 
     }
 
@@ -88,7 +89,7 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
 
     public Stack<BaseOpt> getOptItemStack(){
         if(mHelp !=null ){
-            return mHelp.getOptItemStack();
+            return mHelp.getOptUndoStack();
         }
         return new Stack<BaseOpt>();
     }
@@ -113,6 +114,11 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
         imgView.saveAllBackOpt();
     }
 
+    public void setBitmap(Bitmap image) {
+        imgView.clearAllOpt();
+        imgView.clearAllBackOPt();
+        imgView.setBitmap(image);
+    }
     /**
      * 清空所有回退操作
      */
@@ -138,7 +144,7 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
     }
 
     public void clear(boolean isAnima) {
-        imgView.clearAllOpt(isAnima);
+        imgView.clearAllOpt();
         onModeClick(IOptionMode.NONE);
     }
 
