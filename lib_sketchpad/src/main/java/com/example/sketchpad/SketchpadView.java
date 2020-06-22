@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import com.example.sketchpad.option.BaseOpt;
 import com.example.sketchpad.option.IOptionMode;
 import com.example.sketchpad.utils.CanvasManager;
-import com.example.sketchpad.utils.IMGHelp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,6 +93,11 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
         return new Stack<BaseOpt>();
     }
 
+    public void setAllOptList(List<BaseOpt> optList) {
+        imgView.clearAllOpt();
+        imgView.clearAllBackOPt();
+        mHelp.setAllOptList(optList);
+    }
 
     private OnItemClickInterface onItemClickInterface;
 
@@ -133,6 +137,10 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
         if (onItemClickInterface != null) {
             onItemClickInterface.OnCancelClick(mHelp.getOptItemList().isEmpty() && mHelp.getOptItemList().isEmpty());
         }
+    }
+
+    public void setCanvasSize(int width, int height) {
+        mHelp.setCanvasSize(width, height);
     }
 
     private void onModeClick(@IOptionMode.Mode int mode) {

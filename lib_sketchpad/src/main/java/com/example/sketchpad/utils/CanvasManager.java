@@ -71,6 +71,10 @@ public class CanvasManager {
      */
     private boolean isInitialHoming = false;
 
+    public CanvasManager() {
+        mImage = DEFAULT_IMAGE;
+    }
+
     /**
      * 设置画布大小
      */
@@ -99,6 +103,11 @@ public class CanvasManager {
         }
 
         mImage = bitmap;
+        onImageChanged();
+    }
+
+    public void setAllOptList(List<BaseOpt> optList) {
+        mOptItemList.addAll(optList);
         onImageChanged();
     }
 

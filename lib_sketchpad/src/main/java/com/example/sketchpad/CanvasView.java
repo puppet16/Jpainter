@@ -19,7 +19,6 @@ import com.example.sketchpad.option.BaseOpt;
 import com.example.sketchpad.option.IOptionMode;
 import com.example.sketchpad.utils.CanvasManager;
 import com.example.sketchpad.utils.CommonUtils;
-import com.example.sketchpad.utils.IMGHelp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -374,6 +373,11 @@ public class CanvasView extends FrameLayout {
         //切换图片的时候不让旋转
         mCanvasManager.setBitmap(bitmap);
         scrollTo(0, 0);
+        invalidate();
+    }
+
+    public void setAllOptList(List<BaseOpt> optList) {
+        mCanvasManager.setAllOptList(optList);
         invalidate();
     }
 

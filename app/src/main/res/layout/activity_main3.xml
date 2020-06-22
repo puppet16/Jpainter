@@ -1,19 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <Button
         android:id="@+id/btn1"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="第一"/>
+        android:text="第一" />
 
     <Button
-        android:layout_marginTop="20dp"
         android:id="@+id/btn2"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="第二"/>
+        android:layout_marginTop="20dp"
+        android:text="打开弹窗" />
+
+    <Button
+        android:id="@+id/btn3"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:text="题目ID+1" />
+
+    <Button
+        android:id="@+id/btn4"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:text="题目ID-1" />
 </LinearLayout>
