@@ -96,10 +96,8 @@ public class SketchpadViewDialog extends DialogFragment {
         mView.setOnItemClickInterface(new SketchpadView.OnItemClickInterface() {
             @Override
             public void OnCancelClick(boolean isEmpty) {
-                if (!isEmpty) {
-                    mView.saveAllBackAllOpt();
-                    SketchpadViewManager.getInstance().saveSketchpadView(mNumberId, mView.getAllBackOptList());
-                }
+                mView.saveAllBackAllOpt();
+                SketchpadViewManager.getInstance().saveSketchpadView(mNumberId, mView.getAllBackOptList());
                 mView.resetImage();
                 mView.clear();
                 dismissAllowingStateLoss();
