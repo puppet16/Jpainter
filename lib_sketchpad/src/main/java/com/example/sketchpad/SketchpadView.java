@@ -27,13 +27,15 @@ import java.util.Stack;
  * desc:
  * ============================================================
  **/
-public class SketchpadView extends FrameLayout implements View.OnClickListener  {
+public class SketchpadView extends FrameLayout implements View.OnClickListener {
 
-    private CanvasView imgView;
-    private TextView tvCancel;
-    private Button tvClearAll, tvRubber, tvDoodle;
+    private CanvasView mCanvasView;
+    private TextView mTvCancel;
+    private Button mBtnClearAll;
+    private Button mBtnRubber;
+    private Button mBtnDoodle;
     private CanvasManager mHelp;
-
+    private boolean mIsRubberSelected;
 
     public SketchpadView(@NonNull Context context) {
         this(context, null);
@@ -50,53 +52,64 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
 
     public void initView(Context context) {
         View rootView = LayoutInflater.from(context).inflate(R.layout.view_sketchpad, this, true);
-        imgView = rootView.findViewById(R.id.dooleView2);
-        tvCancel = rootView.findViewById(R.id.tv_cancel);
-        tvRubber = rootView.findViewById(R.id.tv_rubber);
-        tvClearAll = rootView.findViewById(R.id.tv_claer_all);
-        tvDoodle = rootView.findViewById(R.id.tv_doodle);
-        tvClearAll.setOnClickListener(this);
-        tvCancel.setOnClickListener(this);
-        tvRubber.setOnClickListener(this);
-        tvDoodle.setOnClickListener(this);
-        mHelp = imgView.getCanvasManager();
-
+        mCanvasView = rootView.findViewById(R.id.doodleView);
+        mTvCancel = rootView.findViewById(R.id.tv_cancel);
+        mBtnRubber = rootView.findViewById(R.id.btn_rubber);
+        mBtnClearAll = rootView.findViewById(R.id.btn_claer_all);
+        mBtnDoodle = rootView.findViewById(R.id.btn_doodle);
+        mBtnDoodle.setOnClickListener(this);
+        mBtnClearAll.setOnClickListener(this);
+        mTvCancel.setOnClickListener(this);
+        mBtnRubber.setOnClickListener(this);
+        mHelp = mCanvasView.getCanvasManager();
+        mIsRubberSelected = false;
+        onModeClick(IOptionMode.DOODLE);
     }
 
     @Override
     public void onClick(View view) {
         int vid = view.getId();
-        if (vid == R.id.tv_rubber) {
-            onModeClick(IOptionMode.RUBBER);
-        }else if (vid == R.id.tv_cancel) {
+        if (vid == R.id.btn_rubber) {
+            if (mIsRubberSelected) {
+                onModeClick(IOptionMode.DOODLE);
+            } else {
+                onModeClick(IOptionMode.RUBBER);
+            }
+            mIsRubberSelected = !mIsRubberSelected;
+            updateRubberUI();
+        } else if (vid == R.id.tv_cancel) {
             onCancelClick();
-        }else if (vid == R.id.tv_doodle) {
-            onModeClick(IOptionMode.DOODLE);
-        }else if (vid == R.id.tv_claer_all) {
-            if(onItemClickInterface!=null){
+        } else if (vid == R.id.btn_claer_all) {
+            if (onItemClickInterface != null) {
+                mIsRubberSelected = false;
+                updateRubberUI();
                 onItemClickInterface.OnClearAllClick();
             }
         }
     }
 
-    public List<BaseOpt> getOptItemList(){
-        if(mHelp!=null){
+    private void updateRubberUI() {
+        mBtnRubber.setBackgroundResource(mIsRubberSelected ? R.mipmap.icon_sketchpad_opt_rubber_select : R.mipmap.icon_sketchpad_opt_rubber_normal);
+    }
+
+    public List<BaseOpt> getOptItemList() {
+        if (mHelp != null) {
             return mHelp.getOptItemList();
         }
         return new ArrayList<>();
     }
 
-    public Stack<BaseOpt> getOptItemStack(){
-        if(mHelp !=null ){
+    public Stack<BaseOpt> getOptItemStack() {
+        if (mHelp != null) {
             return mHelp.getOptUndoStack();
         }
         return new Stack<BaseOpt>();
     }
 
     public void setAllOptList(List<BaseOpt> optList) {
-        imgView.clearAllOpt();
-        imgView.clearAllBackOPt();
-        mHelp.setAllOptList(optList);
+        mCanvasView.clearAllOpt();
+        mCanvasView.clearAllBackOPt();
+        mCanvasView.setAllOptList(optList);
     }
 
     private OnItemClickInterface onItemClickInterface;
@@ -104,30 +117,32 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
 
     public interface OnItemClickInterface {
         void OnCancelClick(boolean isEmpty);
+
         void OnClearAllClick();
     }
 
-    public List<BaseOpt> getAllBackOptList(){
+    public List<BaseOpt> getAllBackOptList() {
         return mHelp.getAllBackOptList();
     }
 
     /**
      * 保存所有回退操作
      */
-    public void saveAllBackAllOpt(){
-        imgView.saveAllBackOpt();
+    public void saveAllBackAllOpt() {
+        mCanvasView.saveAllBackOpt();
     }
 
     public void setBitmap(Bitmap image) {
-        imgView.clearAllOpt();
-        imgView.clearAllBackOPt();
-        imgView.setBitmap(image);
+        mCanvasView.clearAllOpt();
+        mCanvasView.clearAllBackOPt();
+        mCanvasView.setBitmap(image);
     }
+
     /**
      * 清空所有回退操作
      */
-    public void clearAllBackAllOpt(){
-        imgView.clearAllBackOPt();
+    public void clearAllBackAllOpt() {
+        mCanvasView.clearAllBackOPt();
     }
 
     /**
@@ -135,7 +150,7 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
      */
     private void onCancelClick() {
         if (onItemClickInterface != null) {
-            onItemClickInterface.OnCancelClick(mHelp.getOptItemList().isEmpty() && mHelp.getOptItemList().isEmpty());
+            onItemClickInterface.OnCancelClick(mHelp.getOptItemList().isEmpty());
         }
     }
 
@@ -144,15 +159,22 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
     }
 
     private void onModeClick(@IOptionMode.Mode int mode) {
-        int cm = imgView.getMode();
+        int cm = mCanvasView.getMode();
         if (cm == mode) {
             mode = IOptionMode.NONE;
         }
-        imgView.setMode(mode);
+        mCanvasView.setMode(mode);
     }
 
-    public void clear(boolean isAnima) {
-        imgView.clearAllOpt();
+    /**
+     * 切换为涂鸦模式
+     */
+    public void changeModeToDoodle() {
+        onModeClick(IOptionMode.DOODLE);
+    }
+
+    public void clear() {
+        mCanvasView.clearAllOpt();
         onModeClick(IOptionMode.NONE);
     }
 
@@ -161,6 +183,6 @@ public class SketchpadView extends FrameLayout implements View.OnClickListener  
     }
 
     public void resetImage() {
-        imgView.reset();
+        mCanvasView.reset();
     }
 }

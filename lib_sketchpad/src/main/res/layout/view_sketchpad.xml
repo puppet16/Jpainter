@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <com.example.sketchpad.CanvasView
-        android:id="@+id/dooleView2"
+        android:id="@+id/doodleView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#80000000" />
@@ -44,10 +44,10 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/tv_doodle"
+                android:id="@+id/btn_doodle"
                 android:textColor="@android:color/white"
-
                 android:layout_width="50dp"
+                android:visibility="gone"
                 android:layout_height="44dp"
                 android:layout_marginLeft="12dp"
                 android:clickable="true"
@@ -57,19 +57,16 @@
                 android:textSize="16sp"/>
 
             <Button
-                android:id="@+id/tv_rubber"
+                android:id="@+id/btn_rubber"
                 android:textColor="@android:color/white"
-                android:layout_width="50dp"
-                android:layout_height="44dp"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
                 android:layout_marginLeft="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="橡皮擦"
-                android:textSize="16sp"/>
+                android:background="@mipmap/icon_sketchpad_opt_rubber_normal"
+                android:gravity="center"/>
 
             <Button
-                android:id="@+id/tv_claer_all"
+                android:id="@+id/btn_claer_all"
                 android:layout_width="44dp"
                 android:layout_height="44dp"
                 android:layout_marginLeft="12dp"

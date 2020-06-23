@@ -10,11 +10,11 @@ import java.util.List;
  * ============================================================
  * Author: ltt
  * date: 2020/6/22
- * desc: 草稿管理类
+ * desc: 按题号管理草稿类
  * ============================================================
  **/
 public class SketchpadViewManager {
-    HashMap<String, List<BaseOpt>> mSketchpadMap;
+    private HashMap<String, List<BaseOpt>> mSketchpadMap;
 
     private static class SketchpadViewManagerInstance {
         private static final SketchpadViewManager instance = new SketchpadViewManager();
@@ -51,14 +51,17 @@ public class SketchpadViewManager {
      * @param optList
      * @return
      */
-    public List<BaseOpt> saveSketchpadView(String numberId, List<BaseOpt> optList) {
+    public void saveSketchpadView(String numberId, List<BaseOpt> optList) {
         if (mSketchpadMap == null) {
             mSketchpadMap = new HashMap<>();
         }
-        return mSketchpadMap.put(numberId, optList);
+        mSketchpadMap.put(numberId, optList);
     }
 
     public void onDestroy() {
-
+        if (mSketchpadMap != null) {
+            mSketchpadMap.clear();
+            mSketchpadMap = null;
+        }
     }
 }

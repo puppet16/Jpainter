@@ -1,6 +1,7 @@
 package com.example.jpainter;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -95,17 +96,13 @@ public class SketchpadViewDialog extends DialogFragment {
         mView.setOnItemClickInterface(new SketchpadView.OnItemClickInterface() {
             @Override
             public void OnCancelClick(boolean isEmpty) {
-                if (isEmpty) {
-                    mView.resetImage();
-                    mView.clear(true);
-                } else {
-                    toastShow("弹窗提示是否保存");
+                if (!isEmpty) {
                     mView.saveAllBackAllOpt();
                     SketchpadViewManager.getInstance().saveSketchpadView(mNumberId, mView.getAllBackOptList());
-                    mView.resetImage();
-                    mView.clear(true);
-                    dismissAllowingStateLoss();
                 }
+                mView.resetImage();
+                mView.clear();
+                dismissAllowingStateLoss();
             }
 
 
@@ -114,7 +111,8 @@ public class SketchpadViewDialog extends DialogFragment {
                 if (!mView.getOptItemList().isEmpty() || !mView.getOptItemStack().isEmpty()) {
                     mView.clearAllBackAllOpt();
                     mView.resetImage();
-                    mView.clear(true);
+                    mView.clear();
+                    mView.changeModeToDoodle();
                 }
             }
         });
@@ -122,5 +120,10 @@ public class SketchpadViewDialog extends DialogFragment {
 
     private void toastShow(String content) {
         Toast.makeText(getContext(), content, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
     }
 }

@@ -24,12 +24,12 @@ public class MainActivity extends AppCompatActivity {
             public void OnCancelClick(boolean isEmpty) {
                 if (isEmpty) {
                     mView.resetImage();
-                    mView.clear(true);
+                    mView.clear();
                 } else {
                     toastShow("弹窗提示");
                     mView.saveAllBackAllOpt();
                     mView.resetImage();
-                    mView.clear(true);
+                    mView.clear();
                 }
             }
 
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!mView.getOptItemList().isEmpty() || !mView.getOptItemStack().isEmpty()) {
                     mView.clearAllBackAllOpt();
                     mView.resetImage();
-                    mView.clear(true);
+                    mView.clear();
                 }
             }
         });
